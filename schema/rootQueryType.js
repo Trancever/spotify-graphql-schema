@@ -1,29 +1,29 @@
 const graphql = require('graphql')
-const {
-  GraphQLObjectType,
-  GraphQLID,
-  GraphQLString,
-  GraphQLInt,
-  GraphQLList,
-} = graphql
-const data = require('../data.json')
+const { GraphQLObjectType, GraphQLString } = graphql
+const axios = require('axios')
 
 const UserType = new GraphQLObjectType({
   name: 'UserType',
   fields: {
-    id: { type: GraphQLID },
-    name: { type: GraphQLString },
-    age: { type: GraphQLInt },
+    id: { type: GraphQLString },
+    display_name: { type: GraphQLString },
+    type: { type: GraphQLString },
   },
 })
 
 const RootQuery = new GraphQLObjectType({
   name: 'RootQueryType',
   fields: {
-    users: {
-      type: new GraphQLList(UserType),
-      resolve() {
-        return data
+    me: {
+      type: UserType,
+      resolve(parentValue, args, req) {
+        return axios
+          .get(`https://api.spotify.com/v1/me`, {
+            headers: {
+              Authorization: 'Bearer ' + req.accessToken,
+            },
+          })
+          .then(res => res.data)
       },
     },
   },
